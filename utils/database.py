@@ -4,11 +4,18 @@ import streamlit as st
 from google.oauth2.service_account import Credentials
 
 def connect_sheet():
-    # Fix: convert secrets object to normal dictionary
+    # Load credentials properly from Streamlit secrets
     service_account_info = dict(st.secrets["service_account"])
 
-    # Create credentials object
-    credentials = Credentials.from_service_account_info(service_account_info)
+    # Add required Google scopes
+    scopes = [
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive",
+        "https://www.googleapis.com/auth/drive.file"
+    ]
+
+    # Create credentials object with scopes
+    credentials = Credentials.from_service_account_info(service_account_info, scopes=scopes)
 
     # Authorize the client
     gc = gspread.authorize(credentials)
@@ -17,6 +24,7 @@ def connect_sheet():
     sheet = gc.open_by_key(st.secrets["GOOGLE_SHEET_ID"]).sheet1
 
     return sheet
+
 
 def save_ranked_results(results):
     sheet = connect_sheet()
